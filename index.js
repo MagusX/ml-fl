@@ -4,6 +4,7 @@ const multer = require('multer');
 const app = express();
 const { EventEmitter } = require('events');
 const event = new EventEmitter();
+const { loadingPage, resultPage } = require('./html');
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -55,6 +56,7 @@ function readySend(req, res, next) {
     const fname = req.body.fname;
     const path = `../public/request/${fname}\n`;
     command.stdin.write(path);
+    res.write(loadingPage());
     event.once('ready', () => {
         res.resData = resData;
         resData = '';
@@ -63,19 +65,20 @@ function readySend(req, res, next) {
 }
 
 app.get('/', (req, res) => {
-    return res.render('detect', {status: 'pending', fname: null, resData: res.resData});
+    return res.render('detect', {status: 'pending', fname: null});
 });
 
-app.post('/', upload.single('picture'), (req, res) => {
+app.post('/upload', upload.single('picture'), (req, res) => {
     if (!req.file) {
         return res.end();
     }
-    return res.render('detect', {status: 'ready', fname: req.file.originalname, resData: res.resData});
+    return res.render('detect', {status: 'ready', fname: req.file.originalname});
 });
 
 app.post('/detect', readySend, (req, res) => {
     fs.unlinkSync('./public/request/' + req.body.fname);
-    return res.render('detect', {resData: res.resData});
+    res.write(resultPage(res.resData));
+    res.end();
 });
 
 app.listen(3000, () => {
