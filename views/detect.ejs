@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8"/>
+        <title>Demo1</title>
+    </head>
+    <body>
+        <% if (status === "pending") { %>
+            <form action="/upload" method="POST" enctype="multipart/form-data">
+                <label for="picture">Upload a picture:</label>
+                <input type="file" id="picture" name="picture" accept="image/png, image/jpeg" required>
+                <div>
+                    <input type="submit" value="Upload" />
+                </div>
+            </form>
+        <% } %>
+        <% if (status === "ready") { %>
+            <form action="/" method="POST">
+                <input type="text" name="fname" value="<%= fname %>" readonly>
+                <input type="submit" value="Detect" />
+            </form>
+        <% } %>
+    </body>
+</html>
