@@ -1,21 +1,10 @@
 const express = require('express');
 const fs = require('fs');
-const multer = require('multer');
 const app = express();
 const { EventEmitter } = require('events');
 const event = new EventEmitter();
-const { detectorPage, resultPage } = require('./html');
-
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-      cb(null, './public/request')
-    },
-    filename: function (req, file, cb) {
-      cb(null, file.originalname)
-    }
-});
-
-const upload = multer({ storage: storage })
+const { resultPage } = require('./html');
+const { readySend, clearReqImgs, upload } = require('./middleware/middleware');
 
 app.use(express.json());
 app.use(express.urlencoded({
@@ -51,33 +40,21 @@ command.on('exit', code => {
     console.log('Child process exited with code ' + code);
 });
 
-function readySend(req, res, next) {
-    console.log('sent');
-    const fname = req.body.fname;
-    const path = `../public/request/${fname}\n`;
-    command.stdin.write(path);
-    res.write(detectorPage());
-    event.once('ready', () => {
-        res.resData = resData;
-        resData = '';
-        next();
-    });
-}
-
-app.get('/', (req, res) => {
+app.get('/', clearReqImgs, (req, res) => {
     return res.render('detect', {status: 'pending', fname: null});
 });
 
-app.post('/upload', upload.single('picture'), (req, res) => {
+app.post('/upload', clearReqImgs, upload.single('picture'), (req, res) => {
     if (!req.file) {
         return res.end();
     }
     return res.render('detect', {status: 'ready', fname: req.file.originalname});
 });
 
-app.post('/detect', readySend, (req, res) => {
+app.post('/detect', readySend(event, command), (req, res) => {
     fs.unlinkSync('./public/request/' + req.body.fname);
-    res.write(resultPage(res.resData));
+    res.write(resultPage(resData));
+    resData = '';
     res.end();
 });
 
