@@ -4,7 +4,7 @@ const multer = require('multer');
 const app = express();
 const { EventEmitter } = require('events');
 const event = new EventEmitter();
-const { loadingPage, resultPage } = require('./html');
+const { detectorPage, resultPage } = require('./html');
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -56,7 +56,7 @@ function readySend(req, res, next) {
     const fname = req.body.fname;
     const path = `../public/request/${fname}\n`;
     command.stdin.write(path);
-    res.write(loadingPage());
+    res.write(detectorPage());
     event.once('ready', () => {
         res.resData = resData;
         resData = '';
