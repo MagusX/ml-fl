@@ -13,7 +13,7 @@ app.use(express.urlencoded({
 app.use(express.static(__dirname + '/public'));
 app.set('view engine', 'ejs');
 const spawn = require('child_process').spawn;
-const command = spawn('./detect.sh');
+const command = spawn('sh ./detect.sh', { shell: true });
 let first = true;
 let resData = '';
 
