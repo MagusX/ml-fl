@@ -22,9 +22,11 @@ module.exports = {
     </div>
     `),
     resultPage: resData => {
-    let _resData = resData.split('\n');
-    _resData = [..._resData[0].split(': '), ..._resData.slice(1, _resData.length - 1)];
-    _resData = _resData.slice(1, _resData.length).join('<br>');
+    let _resData = resData.split('../public/request/');
+    _resData = _resData[1].split('\n');
+    _tmp = _resData[0].split(': Predicted');
+    _resData[0] = `${_tmp[0]}<br>Predicted${_tmp[1]}`;
+    _resData = _resData.slice(0, _resData.length - 1).join('<br>');
     return `<div>
         <script type="text/javascript">document.getElementById("loading").setAttribute("hidden", true)</script>
         <script type="text/javascript">document.getElementById("result").removeAttribute("hidden")</script>
